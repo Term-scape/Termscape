@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .word {
+      position: absolute;
+      font-size: 18px;
+      white-space: nowrap;
+      transition: color 0.3s ease; /* Add transition property for color changes */
+    }
+
+    .black {
+      color: black;
+    }
+
+    .grey {
+      color: lightgrey;
+    }
+
+    .word.hovered {
+      color: blue; /* Change this to the color you want on hover */
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
+  <script>
+    Math.seedrandom('your_seed_here');
+
+    const originalWords = [
+      "Device serial number", "We use anonymized data", "We use device identifiers", "Collects information", "Sends data", "Local data protection authorities",
+      "With your consent", " We can save audio recordings", "What are your rights", "Accesses and discloses data", "You will not be able to", "You may need to accept",
+      "Operational controllers", "Reserves the right to terminate your access to", "Legal requirements", "Remove your content", "Stop using the services", "By closing your account",
+      "User verification protocols", "Application of encryption measures", "Collaboration with external service providers", "Tracking tech and cookies",  "Setting retention policies", "Notifying policy changes", "Enforcing authentication safeguards", "Developing incident response protocols", "Communicating breach notifications", "Ensuring international transfer compliance", "Incorporating opt-out mechanisms", "Enforcing security measures", "Facilitating portability options","Aggregating anonymous usage metrics", "Managing in-app preferences", "Facilitating consent withdrawal", "Securing financial transactions", "Implementing two-step authentication", "Assisting user data access requests", "Providing user conduct guidelines", "Acknowledging terms upon updates", "Adhering to anonymization principles", "Recognizing subject rights", "Establishing disposal protocols", "Managing restricted access zones", "Managing geolocation permissions", "The liability limitation provisions", "Fulfilling indemnification responsibilities", "Protecting user privacy", "Ensuring data integrity", "Enhancing security measures", "Implementing data encryption", "Auditing access logs", "Conducting security assessments",
+      "Monitoring network traffic", "Collaborating with cybersecurity experts", "Facilitating data portability", "Managing user authentication", "Optimizing system performance", "Responding to data breaches",
+      "Complying with industry standards", "Conducting regular security audits", "Updating privacy policies", "Encrypting sensitive information", "Securing communication channels", "Ensuring regulatory compliance",
+      "Minimizing data retention periods", "Securing server infrastructure", "Implementing secure coding practices", "Validating user input", "Enhancing incident response plans", "Fees for this license", // Updated this line
+      "Conducting vulnerability assessments", "Securing physical data centers", "Verifying third-party security practices", "Reviewing access control policies", "Enhancing user consent mechanisms"
+    ];
+
+    const encryptedWords = originalWords.map(word => encryptCaesarCipher(word, 3));
+
+    let wordElements = [];
+
+    function encryptCaesarCipher(str, shift) {
+      return str
+        .split("")
+        .map(char => {
+          if (char.match(/[a-zA-Z]/)) {
+            let code = char.charCodeAt(0);
+            let offset = code >= 65 && code <= 90 ? 65 : 97;
+            return String.fromCharCode(((code - offset + shift) % 26) + offset);
+          } else {
+            return char;
+          }
+        })
+        .join("");
+    }
+
+    function createWordElements() {
+      for (let i = 0; i < originalWords.length; i++) {
+        let wordElement = document.createElement('div');
+        wordElement.className = 'word';
+        wordElement.innerHTML = encryptedWords[i];
+        document.body.appendChild(wordElement);
+        wordElements.push({
+          element: wordElement,
+          originalWord: originalWords[i],
+          encryptedWord: encryptedWords[i],
+          showOriginal: false
+        });
+
+        // Apply color styling based on index
+        if (i < 23) {
+          wordElement.classList.add('grey');
+        } else {
+          wordElement.classList.add('black');
+        }
+      }
+    }
+
+    function updateWordPositions() {
+      wordElements.forEach(word => {
+        let x, y;
+        do {
+          x = Math.random() * (window.innerWidth - 286); // Subtract 100 to avoid getting too close to the right edge
+          y = Math.random() * (window.innerHeight - 20); // Subtract 50 to avoid getting too close to the bottom edge
+        } while (isOverlap(x, y));
+
+        word.element.style.left = x + 'px';
+        word.element.style.top = y + 'px';
+      });
+    }
+
+    function isOverlap(x, y) {
+      return wordElements.some(word => {
+        let rect = word.element.getBoundingClientRect();
+        return (
+          x < rect.right + 50 &&
+          x + 50 > rect.left &&
+          y < rect.bottom + 50 &&
+          y + 50 > rect.top
+        );
+      });
+    }
+
+    function mouseMoved(event) {
+      let mouseX = event.clientX;
+      let mouseY = event.clientY;
+
+      wordElements.forEach(word => {
+        let rect = word.element.getBoundingClientRect();
+
+        if (
+          mouseX > rect.left &&
+          mouseX < rect.right &&
+          mouseY > rect.top &&
+          mouseY < rect.bottom
+        ) {
+          word.showOriginal = true;
+          word.element.classList.add('hovered'); // Add class for hover effect
+        } else {
+          word.showOriginal = false;
+          word.element.classList.remove('hovered'); // Remove class when not hovered
+        }
+      });
+
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      wordElements.forEach(word => {
+        word.element.innerHTML = word.showOriginal ? word.originalWord : word.encryptedWord;
+      });
+    }
+
+    window.addEventListener('resize', () => {
+      updateWordPositions();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      createWordElements();
+      updateWordPositions();
+      document.addEventListener('mousemove', mouseMoved);
+    });
+  </script>
+</head>
+<body>
+</body>
+</html>
